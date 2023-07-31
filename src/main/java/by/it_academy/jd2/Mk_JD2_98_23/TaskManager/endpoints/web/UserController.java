@@ -4,6 +4,7 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserToUserDTOC
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.*;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,13 @@ public class UserController {
     public ResponseEntity<PageOfUserDTO> page(@RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "20") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        PageOfUserDTO pageOfUserDTO = userService.get(pageRequest);
+        Page<User> users = userService.get(pageRequest);
+
+        PageOfUserDTO pageOfUserDTO = new PageOfUserDTO(users.getNumber(),users.getSize(),
+                users.getTotalPages(), users.getTotalElements(), users.isFirst(),
+                users.getNumberOfElements(), users.isLast(),
+                users.get().map(this.convertor::convert).toList());
+
         return new ResponseEntity<>(pageOfUserDTO, HttpStatus.ACCEPTED);
     }
 
@@ -42,6 +49,7 @@ public class UserController {
     public ResponseEntity<UserDTO> readCard(@PathVariable UUID uuid) {
         User user = userService.get(uuid);
         UserDTO userDTO = this.convertor.convert(user);
+
         return new ResponseEntity<>(userDTO, HttpStatus.ACCEPTED);
     }
 
@@ -54,19 +62,7 @@ public class UserController {
 
         User userUpdate = userService.update(userUpdateDTO);
         UserDTO userDTO = this.convertor.convert(userUpdate);
+
         return new ResponseEntity<>(userDTO, HttpStatus.ACCEPTED);
-    }
-
-    @PostMapping(value ="/registration", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<?> registration(@RequestBody UserRegistrationDTO userRegistrationDTO){
-        userService.registration(userRegistrationDTO);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @GetMapping(value ="/verification", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<?> verification(@RequestParam String code,
-                                          @RequestParam String mail){
-        boolean isActivate = userService.activate(mail, code);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

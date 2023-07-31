@@ -1,10 +1,5 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto;
 
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserStatus;
-
-import java.util.UUID;
-
 public class UserCreateDTO {
 
     private String mail;

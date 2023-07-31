@@ -20,7 +20,9 @@ public interface IUserDao extends JpaRepository<User, UUID> {
     @Override
     Optional<User> findById(UUID uuid);
 
-    User findByMailAndActivationCode(String email, UUID activationCode);
+    Optional<User> findByMail(String email);
+
+    User findByMailAndActivationCode(String email, UUID acticationCode);
 
 
 }
