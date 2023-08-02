@@ -26,9 +26,9 @@ public class UserDTO {
         this.status = status;
     }
 
-    public UserDTO(String mail, String fio, String role, String status) {
-        this.mail = mail;
+    public UserDTO(String fio, String mail, String role, String status) {
         this.fio = fio;
+        this.mail = mail;
         this.role = role;
         this.status = status;
     }

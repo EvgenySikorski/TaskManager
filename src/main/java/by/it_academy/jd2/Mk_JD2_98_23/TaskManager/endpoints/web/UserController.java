@@ -32,12 +32,12 @@ public class UserController {
     }
 
     @GetMapping(consumes = "application/json", produces = "application/json" )
-    public ResponseEntity<PageOfUserDTO> page(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<PageDTO<UserDTO>> page(@RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "20") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<User> users = userService.get(pageRequest);
 
-        PageOfUserDTO pageOfUserDTO = new PageOfUserDTO(users.getNumber(),users.getSize(),
+        PageDTO<UserDTO> pageOfUserDTO = new PageDTO<>(users.getNumber(),users.getSize(),
                 users.getTotalPages(), users.getTotalElements(), users.isFirst(),
                 users.getNumberOfElements(), users.isLast(),
                 users.get().map(this.convertor::convert).toList());

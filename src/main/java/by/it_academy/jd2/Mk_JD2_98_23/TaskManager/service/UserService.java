@@ -5,6 +5,9 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserToUserDTOC
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.*;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.IUserDao;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.MailAlreadyExistsException;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.UserNotFoundException;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.VersionException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +31,7 @@ public class UserService implements IUserService {
 
     @Override
     public User save(UserCreateDTO item) {
-        userDao.findByMail(item.getMail()).ifPresent(u -> {throw new RuntimeException("аккаунт с таким емайлом уже создан");});
+        userDao.findByMail(item.getMail()).ifPresent(u -> {throw new MailAlreadyExistsException(item.getMail());});
         UserDTO userDTO = new UserDTO(item.getFio(), item.getMail(),item.getRole(), item.getStatus());
         User userCreat = this.converterDTOToUser.convert(userDTO);
         userCreat.setPassword(item.getPassword());
@@ -45,7 +48,7 @@ public class UserService implements IUserService {
 
     @Override
     public User get(UUID uuid) {
-        return userDao.findById(uuid).orElseThrow(()->new IllegalArgumentException("user с указанным id не найден"));
+        return userDao.findById(uuid).orElseThrow(()->new UserNotFoundException(uuid));
     }
 
     @Override
@@ -58,7 +61,7 @@ public class UserService implements IUserService {
         if (user.getDt_update().isEqual(userFromDB.getDt_update())){
             return userDao.save(user);
         } else{
-            throw new RuntimeException("дата обновления не совпадает");
+            throw new VersionException();
         }
     }
 }
