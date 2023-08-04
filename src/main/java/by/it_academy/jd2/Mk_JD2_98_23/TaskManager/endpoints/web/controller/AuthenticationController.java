@@ -1,4 +1,4 @@
-package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web;
+package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.controller;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserRegistrationDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuthenticationService;

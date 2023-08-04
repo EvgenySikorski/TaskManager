@@ -3,11 +3,15 @@ package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserDTOToUserConvertor;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserToUserDTOConvertor;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.*;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.audit.AuditCreatDTO;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EEssenceType;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.IUserDao;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.MailAlreadyExistsException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.UserNotFoundException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.VersionException;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuditService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,14 +23,14 @@ public class UserService implements IUserService {
 
     private final IUserDao userDao;
     private final UserDTOToUserConvertor converterDTOToUser;
-    private final UserToUserDTOConvertor converterUserToDTO;
+    private final UserToUserDTOConvertor convertorUserToDTO;
+    private final IAuditService auditService;
 
-
-
-    public UserService(IUserDao userDao, UserDTOToUserConvertor converter, UserToUserDTOConvertor converterUserToDTO) {
+    public UserService(IUserDao userDao, UserDTOToUserConvertor converterDTOToUser, UserToUserDTOConvertor convertorUserToDTO, IAuditService auditService) {
         this.userDao = userDao;
-        this.converterDTOToUser = converter;
-        this.converterUserToDTO = converterUserToDTO;
+        this.converterDTOToUser = converterDTOToUser;
+        this.convertorUserToDTO = convertorUserToDTO;
+        this.auditService = auditService;
     }
 
     @Override
@@ -37,13 +41,16 @@ public class UserService implements IUserService {
         userCreat.setPassword(item.getPassword());
         userCreat.setUuid(UUID.randomUUID());
 
-        return userDao.save(userCreat);
+        User saveUser = this.userDao.save(userCreat);
+        UserDTO userDTOForAudit = this.convertorUserToDTO.convert(saveUser);
+        saveActionToAudit(userDTOForAudit, "Сохранен новый пользователь");
+
+        return saveUser;
     }
 
     @Override
     public Page<User> get(PageRequest pageRequest) {
-        Page<User> userPage = userDao.findAll(pageRequest);
-        return userPage;
+        return this.userDao.findAll(pageRequest);
     }
 
     @Override
@@ -58,10 +65,27 @@ public class UserService implements IUserService {
         User user = this.converterDTOToUser.convert(userDTO);
         user.setPassword(item.getPassword());
         User userFromDB = get(item.getUuid());
-        if (user.getDt_update().isEqual(userFromDB.getDt_update())){
-            return userDao.save(user);
-        } else{
+        if (!user.getDt_update().isEqual(userFromDB.getDt_update())){
             throw new VersionException();
         }
+
+        User updateUserFromDB = userDao.save(user);
+        UserDTO userDTOForAudit = this.convertorUserToDTO.convert(updateUserFromDB);
+        saveActionToAudit(userDTOForAudit, "Пользователь обновлен");
+
+        return updateUserFromDB;
+    }
+
+    public void saveActionToAudit(UserDTO userDTO, String text){
+        AuditCreatDTO auditCreatDTO = new AuditCreatDTO(
+            userDTO.getUuid(),
+            userDTO.getMail(),
+            userDTO.getFio(),
+            EUserRole.valueOf(userDTO.getRole()),
+            text,
+            EEssenceType.USER,
+            userDTO.getUuid().toString()
+        );
+        this.auditService.save(auditCreatDTO);
     }
 }

@@ -2,7 +2,7 @@ CREATE TABLE app.users
 (
     uuid uuid,
     fio text NOT NULL,
-    role text,
+    role text NOT NULL,
     status text NOT NULL,
     activation_code uuid,
     email text NOT NULL,
@@ -13,5 +13,3 @@ CREATE TABLE app.users
     UNIQUE (email)
 );
 
-ALTER TABLE IF EXISTS app.users
-    OWNER to postgres;

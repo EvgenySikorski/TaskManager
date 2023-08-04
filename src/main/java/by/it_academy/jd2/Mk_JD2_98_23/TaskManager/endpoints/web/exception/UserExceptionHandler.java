@@ -3,10 +3,7 @@ package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EErrorType;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.errors.ErrorResponse;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.errors.StructuredErrorResponse;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.ConversionException;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.MailAlreadyExistsException;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.UserNotFoundException;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.VersionException;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.*;
 import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.http.HttpStatus;
@@ -58,6 +55,12 @@ public class UserExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFountError(UserNotFoundException exception){
         ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь с id " + exception.getUuid() + "не найден");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuditNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAuditNotFoundException(AuditNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Аудит с id " + exception.getUuid() + "не найден");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
