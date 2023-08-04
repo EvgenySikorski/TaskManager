@@ -12,6 +12,9 @@ public class UserRegistrationDTO {
         this.password = password;
     }
 
+    public UserRegistrationDTO() {
+    }
+
     public String getMail() {
         return mail;
     }
