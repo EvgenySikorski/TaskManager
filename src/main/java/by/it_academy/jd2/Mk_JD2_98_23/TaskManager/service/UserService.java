@@ -88,4 +88,9 @@ public class UserService implements IUserService {
         );
         this.auditService.save(auditCreatDTO);
     }
+
+    @Override
+    public User getCardByMail(String email) {
+        return userDao.findByMail(email).orElseThrow(()->new UserNotFoundException());
+    }
 }

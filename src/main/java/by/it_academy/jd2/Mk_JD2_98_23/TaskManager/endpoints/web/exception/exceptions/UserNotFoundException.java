@@ -11,6 +11,9 @@ public class UserNotFoundException extends RuntimeException {
         this.uuid = uuid;
     }
 
+    public UserNotFoundException() {
+    }
+
     public UUID getUuid() {
         return uuid;
     }

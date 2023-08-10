@@ -70,5 +70,11 @@ public class UserExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PasswordWrongException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordError(PasswordWrongException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пароль указан не верно");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 
 }

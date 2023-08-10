@@ -13,6 +13,8 @@ public interface IUserService {
     Page<User> get(PageRequest pageRequest);
     User get(UUID uuid);
     User update(UserUpdateDTO item);
+    User getCardByMail(String email);
+
 
 
 }

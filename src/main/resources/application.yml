@@ -16,4 +16,8 @@ spring:
       starttls.enable: true
 
 server:
-  port: 81
+  port: 80
+
+jwt:
+  secret: NDQ1ZjAzNjQtMzViZi00MDRjLTljZjQtNjNjYWIyZTU5ZDYw
+  issuer: ITAcademy
