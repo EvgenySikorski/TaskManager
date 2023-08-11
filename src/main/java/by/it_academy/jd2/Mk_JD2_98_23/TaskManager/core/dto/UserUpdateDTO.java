@@ -27,6 +27,15 @@ public class UserUpdateDTO {
         this.dt_update = dt_update;
     }
 
+    public UserUpdateDTO(UUID uuid, String mail, String fio, String role, String status, String password) {
+        this.uuid = uuid;
+        this.mail = mail;
+        this.fio = fio;
+        this.role = role;
+        this.status = status;
+        this.password = password;
+    }
+
     public UUID getUuid() {
         return uuid;
     }

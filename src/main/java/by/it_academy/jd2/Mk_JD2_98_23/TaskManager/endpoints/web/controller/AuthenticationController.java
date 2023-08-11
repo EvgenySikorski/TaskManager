@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/users")
 public class AuthenticationController {
@@ -30,7 +32,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("/verification")
-    public ResponseEntity<?> verification(@RequestParam String code,
+    public ResponseEntity<?> verification(@RequestParam UUID code,
                                           @RequestParam String mail){
         boolean isActivate = authenticationService.activate(mail, code);
         if (!isActivate){

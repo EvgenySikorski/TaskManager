@@ -11,11 +11,10 @@ import java.util.UUID;
 
 public interface IUserDao extends JpaRepository<User, UUID> {
 
-    Optional<User> findByMail(String email);
 
     User findByMailAndActivationCode(String email, UUID acticationCode);
 
-//    User findByMail (String email);
+    User findByMail (String email);
 
 
 

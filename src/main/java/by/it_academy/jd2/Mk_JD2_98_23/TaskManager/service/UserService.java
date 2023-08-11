@@ -15,6 +15,7 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuditService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,21 +26,34 @@ public class UserService implements IUserService {
     private final UserDTOToUserConvertor converterDTOToUser;
     private final UserToUserDTOConvertor convertorUserToDTO;
     private final IAuditService auditService;
+    private final PasswordEncoder encoder;
 
-    public UserService(IUserDao userDao, UserDTOToUserConvertor converterDTOToUser, UserToUserDTOConvertor convertorUserToDTO, IAuditService auditService) {
+
+    public UserService(IUserDao userDao, UserDTOToUserConvertor converterDTOToUser,
+                       UserToUserDTOConvertor convertorUserToDTO, IAuditService auditService,
+                       PasswordEncoder encoder) {
         this.userDao = userDao;
         this.converterDTOToUser = converterDTOToUser;
         this.convertorUserToDTO = convertorUserToDTO;
         this.auditService = auditService;
+        this.encoder = encoder;
     }
 
     @Override
     public User save(UserCreateDTO item) {
-        userDao.findByMail(item.getMail()).ifPresent(u -> {throw new MailAlreadyExistsException(item.getMail());});
+        if (userDao.findByMail(item.getMail()) != null){
+            throw new MailAlreadyExistsException(item.getMail());
+        }
+
         UserDTO userDTO = new UserDTO(item.getFio(), item.getMail(),item.getRole(), item.getStatus());
         User userCreat = this.converterDTOToUser.convert(userDTO);
-        userCreat.setPassword(item.getPassword());
+        userCreat.setPassword(encoder.encode(item.getPassword()));
         userCreat.setUuid(UUID.randomUUID());
+
+        if (item.getStatus().equals("WAITING_ACTIVATION")){
+            UUID activationCode = UUID.randomUUID();
+            userCreat.setActivationCode(activationCode);
+        }
 
         User saveUser = this.userDao.save(userCreat);
         UserDTO userDTOForAudit = this.convertorUserToDTO.convert(saveUser);
@@ -63,7 +77,7 @@ public class UserService implements IUserService {
         UserDTO userDTO = new UserDTO(item.getUuid(), item.getMail(), item.getFio(),
                 item.getRole(), item.getStatus(),item.getDt_update());
         User user = this.converterDTOToUser.convert(userDTO);
-        user.setPassword(item.getPassword());
+        user.setPassword(encoder.encode(item.getPassword()));
         User userFromDB = get(item.getUuid());
         if (!user.getDt_update().isEqual(userFromDB.getDt_update())){
             throw new VersionException();
@@ -75,6 +89,15 @@ public class UserService implements IUserService {
 
         return updateUserFromDB;
     }
+
+    public User updateStatus(User user) {
+        User updateUserFromDB = userDao.save(user);
+        UserDTO userDTOForAudit = this.convertorUserToDTO.convert(updateUserFromDB);
+        saveActionToAudit(userDTOForAudit, "Пользователь активирован");
+        return updateUserFromDB;
+    }
+
+
 
     public void saveActionToAudit(UserDTO userDTO, String text){
         AuditCreatDTO auditCreatDTO = new AuditCreatDTO(
@@ -91,6 +114,6 @@ public class UserService implements IUserService {
 
     @Override
     public User getCardByMail(String email) {
-        return userDao.findByMail(email).orElseThrow(()->new UserNotFoundException());
+        return userDao.findByMail(email);
     }
 }

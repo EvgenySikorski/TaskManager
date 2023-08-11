@@ -2,6 +2,7 @@ package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserDTOToUserConvertor;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.LoginDTO;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserCreateDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserRegistrationDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
@@ -13,6 +14,7 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.except
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.PasswordWrongException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuthenticationService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.INotificationService;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +24,7 @@ import java.util.UUID;
 @Service
 public class AuthenticationService implements IAuthenticationService {
 
-    private final IUserDao userDao;
+    private final IUserService userService;
     private final UserDTOToUserConvertor converterDTOToUser;
     private final PasswordEncoder encoder;
     private final JwtTokenHandler jwtHandler;
@@ -30,10 +32,10 @@ public class AuthenticationService implements IAuthenticationService {
     private final INotificationService notificationService;
 
 
-    public AuthenticationService(IUserDao userDao, UserDTOToUserConvertor converterDTOToUser,
+    public AuthenticationService(IUserService userService, UserDTOToUserConvertor converterDTOToUser,
                                  PasswordEncoder encoder, JwtTokenHandler jwtHandler,
                                  UserDetailsService detailsService, INotificationService notificationService) {
-        this.userDao = userDao;
+        this.userService = userService;
         this.converterDTOToUser = converterDTOToUser;
         this.encoder = encoder;
         this.jwtHandler = jwtHandler;
@@ -43,38 +45,41 @@ public class AuthenticationService implements IAuthenticationService {
 
     @Override
     public void registration(UserRegistrationDTO item) {
-        userDao.findByMail(item.getMail()).ifPresent(u -> {throw new MailAlreadyExistsException(item.getMail());});
+        if (userService.getCardByMail(item.getMail()) != null){
+            throw new MailAlreadyExistsException(item.getMail());
+        };
 
-        UserDTO userDTO = new UserDTO(item.getFio(), item.getMail(), EUserRole.USER.name(), EUserStatus.WAITING_ACTIVATION.name());
-        UUID activationCode = UUID.randomUUID();
-        User userCreat = this.converterDTOToUser.convert(userDTO);
-        userCreat.setPassword(item.getPassword());
-        userCreat.setActivationCode(activationCode);
-        userCreat.setUuid(UUID.randomUUID());
+        UserCreateDTO userCreateDTO = new UserCreateDTO(
+                item.getMail(),
+                item.getFio(),
+                EUserRole.USER.name(),
+                EUserStatus.WAITING_ACTIVATION.name(),
+                encoder.encode(item.getPassword())
+        );
 
-        notificationService.send(userDao.save(userCreat));
+        notificationService.send(userService.save(userCreateDTO));
 
     }
 
     @Override
-    public boolean activate(String email, String code) {
-        User user = userDao.findByMailAndActivationCode(email, UUID.fromString(code));
-        if (user == null){
+    public boolean activate(String email, UUID code) {
+        User user = userService.getCardByMail(email);
+        if (user == null || (!code.equals(user.getActivationCode()))){
             return false;
         }
         user.setActivationCode(null);
         user.setStatus(EUserStatus.ACTIVATED);
 
-        userDao.save(user);
+        userService.updateStatus(user);
         return true;
     }
 
     @Override
     public String login(LoginDTO dto) {
         UserDetails userDetails = detailsService.loadUserByUsername(dto.getMail());
-//        if (encoder.matches(dto.getPassword(),userDetails.getPassword())){
-//            throw new PasswordWrongException();
-//        }
+        if (encoder.matches(dto.getPassword(),userDetails.getPassword())){
+            throw new PasswordWrongException();
+        }
         if (!dto.getPassword().equals(userDetails.getPassword())){
             throw new PasswordWrongException();
         }

@@ -10,11 +10,14 @@ import java.util.UUID;
 
 public interface IUserService {
     User save(UserCreateDTO item);
+
     Page<User> get(PageRequest pageRequest);
+
     User get(UUID uuid);
+
     User update(UserUpdateDTO item);
+
     User getCardByMail(String email);
 
-
-
+    User updateStatus(User user);
 }
