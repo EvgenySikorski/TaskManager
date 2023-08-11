@@ -5,6 +5,11 @@ spring:
     username: postgres
     password: postgres
 
+  thymeleaf:
+    enabled: true
+    prefix: templates/
+    suffix: .txt
+
   mail:
     port: 587
     host: smtp.gmail.com

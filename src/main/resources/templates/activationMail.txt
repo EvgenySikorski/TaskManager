@@ -1,0 +1,4 @@
+Hello, [[${name}]]!
+"Welcome to TaskManager. Please, for activation account follow this link:
+http://localhost:80/users/verification?code=[[${code}]]&mail=[[${mail}]]
+

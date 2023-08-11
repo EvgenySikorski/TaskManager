@@ -9,8 +9,10 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserStatus;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.IUserDao;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.controller.utils.JwtTokenHandler;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.MailAlreadyExistsException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.PasswordWrongException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuthenticationService;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.INotificationService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,26 +24,26 @@ public class AuthenticationService implements IAuthenticationService {
 
     private final IUserDao userDao;
     private final UserDTOToUserConvertor converterDTOToUser;
-    private final MailSenderService mailSenderService;
     private final PasswordEncoder encoder;
     private final JwtTokenHandler jwtHandler;
     private final UserDetailsService detailsService;
+    private final INotificationService notificationService;
 
 
     public AuthenticationService(IUserDao userDao, UserDTOToUserConvertor converterDTOToUser,
-                                 MailSenderService mailSenderService, PasswordEncoder encoder,
-                                 JwtTokenHandler jwtHandler, UserDetailsService detailsService) {
+                                 PasswordEncoder encoder, JwtTokenHandler jwtHandler,
+                                 UserDetailsService detailsService, INotificationService notificationService) {
         this.userDao = userDao;
         this.converterDTOToUser = converterDTOToUser;
-        this.mailSenderService = mailSenderService;
         this.encoder = encoder;
         this.jwtHandler = jwtHandler;
         this.detailsService = detailsService;
+        this.notificationService = notificationService;
     }
 
     @Override
     public void registration(UserRegistrationDTO item) {
-        userDao.findByMail(item.getMail()).ifPresent(u -> {throw new IllegalArgumentException("аккаунт с таким email уже создан");});
+        userDao.findByMail(item.getMail()).ifPresent(u -> {throw new MailAlreadyExistsException(item.getMail());});
 
         UserDTO userDTO = new UserDTO(item.getFio(), item.getMail(), EUserRole.USER.name(), EUserStatus.WAITING_ACTIVATION.name());
         UUID activationCode = UUID.randomUUID();
@@ -50,14 +52,8 @@ public class AuthenticationService implements IAuthenticationService {
         userCreat.setActivationCode(activationCode);
         userCreat.setUuid(UUID.randomUUID());
 
-        userDao.save(userCreat);
+        notificationService.send(userDao.save(userCreat));
 
-        String message = String.format(
-                "Hello! " +
-                        "Welcome to TaskManager. Please, for activation accaunt " +
-                        "follow this link: http://localhost:80/users/verification?code=" + userCreat.getActivationCode() + "&mail=" + userCreat.getMail()
-                        );
-        mailSenderService.send(item.getMail(), "Activation code", message);
     }
 
     @Override
