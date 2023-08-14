@@ -6,24 +6,24 @@ public class PageDTO<T> {
 
     private int number;
     private int size;
-    private int total_pages;
-    private long total_elements;
+    private int totalPages;
+    private long totalElements;
     private boolean first;
-    private int number_of_elements;
+    private int numberOfElements;
     private boolean last;
     private List<T> content;
 
     public PageDTO() {
     }
 
-    public PageDTO(int number, int size, int total_pages, long total_elements, boolean first,
-                   int number_of_elements, boolean last, List<T> content) {
+    public PageDTO(int number, int size, int totalPages, long totalElements, boolean first,
+                   int numberOfElements, boolean last, List<T> content) {
         this.number = number;
         this.size = size;
-        this.total_pages = total_pages;
-        this.total_elements = total_elements;
+        this.totalPages = totalPages;
+        this.totalElements = totalElements;
         this.first = first;
-        this.number_of_elements = number_of_elements;
+        this.numberOfElements = numberOfElements;
         this.last = last;
         this.content = content;
     }
@@ -44,20 +44,20 @@ public class PageDTO<T> {
         this.size = size;
     }
 
-    public int getTotal_pages() {
-        return total_pages;
+    public int getTotalPages() {
+        return totalPages;
     }
 
-    public void setTotal_pages(int total_pages) {
-        this.total_pages = total_pages;
+    public void setTotalPages(int totalPages) {
+        this.totalPages = totalPages;
     }
 
-    public long getTotal_elements() {
-        return total_elements;
+    public long getTotalElements() {
+        return totalElements;
     }
 
-    public void setTotal_elements(long total_elements) {
-        this.total_elements = total_elements;
+    public void setTotalElements(long totalElements) {
+        this.totalElements = totalElements;
     }
 
     public boolean isFirst() {
@@ -68,12 +68,12 @@ public class PageDTO<T> {
         this.first = first;
     }
 
-    public int getNumber_of_elements() {
-        return number_of_elements;
+    public int getNumberOfElements() {
+        return numberOfElements;
     }
 
-    public void setNumber_of_elements(int number_of_elements) {
-        this.number_of_elements = number_of_elements;
+    public void setNumberOfElements(int numberOfElements) {
+        this.numberOfElements = numberOfElements;
     }
 
     public boolean isLast() {

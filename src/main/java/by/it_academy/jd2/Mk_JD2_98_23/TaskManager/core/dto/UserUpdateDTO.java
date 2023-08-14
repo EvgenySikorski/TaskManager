@@ -1,5 +1,8 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class UserUpdateDTO {
@@ -10,21 +13,22 @@ public class UserUpdateDTO {
     private String role;
     private String status;
     private String password;
-    private Long dt_update;
+    @JsonProperty("dt_update")
+    private LocalDateTime dateUpdate;
 
 
     public UserUpdateDTO() {
     }
 
     public UserUpdateDTO(UUID uuid, String mail, String fio, String role,
-                         String status, String password, Long dt_update) {
+                         String status, String password, LocalDateTime dateUpdate) {
         this.uuid = uuid;
         this.mail = mail;
         this.fio = fio;
         this.role = role;
         this.status = status;
         this.password = password;
-        this.dt_update = dt_update;
+        this.dateUpdate = dateUpdate;
     }
 
     public UserUpdateDTO(UUID uuid, String mail, String fio, String role, String status, String password) {
@@ -83,12 +87,12 @@ public class UserUpdateDTO {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public Long getDt_update() {
-        return dt_update;
+    @JsonProperty("dt_update")
+    public LocalDateTime getDateUpdate() {
+        return dateUpdate;
     }
 
-    public void setDt_update(Long dt_update) {
-        this.dt_update = dt_update;
+    public void setDateUpdate(LocalDateTime dateUpdate) {
+        this.dateUpdate = dateUpdate;
     }
 }

@@ -5,6 +5,7 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.errors.StructuredErrorRes
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.serializer.ErrorResponseSerializer;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.serializer.StructuredErrorResponseSerializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -27,6 +28,7 @@ public class ErrorConfig {
         builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         builder.serializerByType(StructuredErrorResponse.class, structuredErrorResponseSerializer);
         builder.serializerByType(ErrorResponse.class, errorResponseSerializer);
+        //builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return builder;
     }
 }

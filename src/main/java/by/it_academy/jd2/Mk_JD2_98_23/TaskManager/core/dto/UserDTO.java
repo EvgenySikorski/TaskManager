@@ -1,12 +1,16 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.UUID;
 
 public class UserDTO {
 
     private UUID uuid;
-    private Long dt_create;
-    private Long dt_update;
+    @JsonProperty("dt_create")
+    private Long dtCreate;
+    @JsonProperty("dt_update")
+    private Long dtUpdate;
     private String mail;
     private String fio;
     private String role; //должен быть String или Enum
@@ -15,11 +19,11 @@ public class UserDTO {
     public UserDTO() {
     }
 
-    public UserDTO(UUID uuid, Long dt_create, Long dt_update,
+    public UserDTO(UUID uuid, Long dtCreate, Long dtUpdate,
                    String mail, String fio, String role, String status) {
         this.uuid = uuid;
-        this.dt_create = dt_create;
-        this.dt_update = dt_update;
+        this.dtCreate = dtCreate;
+        this.dtUpdate = dtUpdate;
         this.mail = mail;
         this.fio = fio;
         this.role = role;
@@ -42,13 +46,13 @@ public class UserDTO {
     }
 
     public UserDTO(UUID uuid, String mail, String fio, String role, String status,
-                   Long dt_update) {
+                   Long dtUpdate) {
         this.uuid = uuid;
         this.mail = mail;
         this.fio = fio;
         this.role = role;
         this.status = status;
-        this.dt_update = dt_update;
+        this.dtUpdate = dtUpdate;
     }
 
     public UUID getUuid() {
@@ -59,20 +63,20 @@ public class UserDTO {
         this.uuid = UUID.randomUUID();
     }
 
-    public Long getDt_create() {
-        return dt_create;
+    public Long getDtCreate() {
+        return dtCreate;
     }
 
-    public void setDt_create(Long dt_create) {
-        this.dt_create = dt_create;
+    public void setDtCreate(Long dtCreate) {
+        this.dtCreate = dtCreate;
     }
 
-    public Long getDt_update() {
-        return dt_update;
+    public Long getDtUpdate() {
+        return dtUpdate;
     }
 
-    public void setDt_update(Long dt_update) {
-        this.dt_update = dt_update;
+    public void setDtUpdate(Long dtUpdate) {
+        this.dtUpdate = dtUpdate;
     }
 
     public String getMail() {

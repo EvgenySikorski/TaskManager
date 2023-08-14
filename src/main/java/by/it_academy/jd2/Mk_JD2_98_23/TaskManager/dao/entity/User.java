@@ -31,11 +31,11 @@ public class User implements Serializable {
     private String password;
 
     @CreationTimestamp(source = SourceType.DB)
-    @Column(name = "dt_create")
+    @Column(name = "dt_create", precision = 3)
     private LocalDateTime dt_create;
     @UpdateTimestamp(source = SourceType.DB)
     @Version
-    @Column(name = "dt_update")
+    @Column(name = "dt_update", precision = 3)
     private LocalDateTime dt_update;
 
     @Enumerated(EnumType.STRING)

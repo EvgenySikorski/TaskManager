@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -55,9 +56,9 @@ public class UserController {
 
     @PutMapping(value = "/{uuid}/dt_update/{dt_update}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<UserDTO> update(@PathVariable UUID uuid,
-                                          @PathVariable ("dt_update") Long dt_update,
+                                          @PathVariable ("dt_update")LocalDateTime updateDate,
                                           @RequestBody UserUpdateDTO userUpdateDTO){
-        userUpdateDTO.setDt_update(dt_update);
+        userUpdateDTO.setDateUpdate(updateDate);
         userUpdateDTO.setUuid(uuid);
 
         User userUpdate = userService.update(userUpdateDTO);

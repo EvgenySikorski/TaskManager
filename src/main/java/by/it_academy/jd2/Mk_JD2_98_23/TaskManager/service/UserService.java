@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneOffset;
 import java.util.UUID;
 @Service
 public class UserService implements IUserService {
@@ -75,13 +76,14 @@ public class UserService implements IUserService {
     @Override
     public User update(UserUpdateDTO item) {
         UserDTO userDTO = new UserDTO(item.getUuid(), item.getMail(), item.getFio(),
-                item.getRole(), item.getStatus(),item.getDt_update());
+                item.getRole(), item.getStatus(),item.getDateUpdate().toInstant(ZoneOffset.UTC).toEpochMilli());
         User user = this.converterDTOToUser.convert(userDTO);
         user.setPassword(encoder.encode(item.getPassword()));
         User userFromDB = get(item.getUuid());
-        if (!user.getDt_update().isEqual(userFromDB.getDt_update())){
+        if (!user.getDt_update().toString().equals(userFromDB.getDt_update().toString())){
             throw new VersionException();
         }
+        userDao.delete(userFromDB);
 
         User updateUserFromDB = userDao.save(user);
         UserDTO userDTOForAudit = this.convertorUserToDTO.convert(updateUserFromDB);
@@ -99,7 +101,7 @@ public class UserService implements IUserService {
 
 
 
-    public void saveActionToAudit(UserDTO userDTO, String text){
+    private void saveActionToAudit(UserDTO userDTO, String text){
         AuditCreatDTO auditCreatDTO = new AuditCreatDTO(
             userDTO.getUuid(),
             userDTO.getMail(),

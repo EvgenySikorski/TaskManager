@@ -4,8 +4,6 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserStatus;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.ConversionException;
-import org.springframework.core.convert.converter.Converter;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -21,11 +19,11 @@ public class UserDTOToUserConvertor {
         if(source.getStatus() != null){
             user.setStatus(EUserStatus.valueOf(source.getStatus()));
         }
-        if (source.getDt_create() != null){
-            user.setDt_create(LocalDateTime.ofInstant(Instant.ofEpochMilli(source.getDt_create()), ZoneOffset.UTC));
+        if (source.getDtCreate() != null){
+            user.setDt_create(LocalDateTime.ofInstant(Instant.ofEpochMilli(source.getDtCreate()), ZoneOffset.UTC));
         }
-        if(source.getDt_update() != null){
-            user.setDt_update(LocalDateTime.ofInstant(Instant.ofEpochMilli(source.getDt_update()), ZoneOffset.UTC));
+        if(source.getDtUpdate() != null){
+            user.setDt_update(LocalDateTime.ofInstant(Instant.ofEpochMilli(source.getDtUpdate()), ZoneOffset.UTC));
         }
         return user;
     }
