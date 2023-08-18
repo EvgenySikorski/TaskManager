@@ -28,16 +28,17 @@ public class UserService implements IUserService {
     private final UserToUserDTOConvertor convertorUserToDTO;
     private final IAuditService auditService;
     private final PasswordEncoder encoder;
-
+    private final UserHolder userHolder;
 
     public UserService(IUserDao userDao, UserDTOToUserConvertor converterDTOToUser,
-                       UserToUserDTOConvertor convertorUserToDTO, IAuditService auditService,
-                       PasswordEncoder encoder) {
+                       UserToUserDTOConvertor convertorUserToDTO,
+                       IAuditService auditService, PasswordEncoder encoder, UserHolder userHolder) {
         this.userDao = userDao;
         this.converterDTOToUser = converterDTOToUser;
         this.convertorUserToDTO = convertorUserToDTO;
         this.auditService = auditService;
         this.encoder = encoder;
+        this.userHolder = userHolder;
     }
 
     @Override
@@ -57,8 +58,7 @@ public class UserService implements IUserService {
         }
 
         User saveUser = this.userDao.save(userCreat);
-        UserDTO userDTOForAudit = this.convertorUserToDTO.convert(saveUser);
-        saveActionToAudit(userDTOForAudit, "Сохранен новый пользователь");
+        saveActionToAudit("Сохранен новый пользователь", saveUser.getUuid().toString(), EEssenceType.USER);
 
         return saveUser;
     }
@@ -86,8 +86,7 @@ public class UserService implements IUserService {
         userDao.delete(userFromDB);
 
         User updateUserFromDB = userDao.save(user);
-        UserDTO userDTOForAudit = this.convertorUserToDTO.convert(updateUserFromDB);
-        saveActionToAudit(userDTOForAudit, "Пользователь обновлен");
+        saveActionToAudit("Пользователь обновлен",updateUserFromDB.getUuid().toString(), EEssenceType.USER);
 
         return updateUserFromDB;
     }
@@ -95,21 +94,23 @@ public class UserService implements IUserService {
     public User updateStatus(User user) {
         User updateUserFromDB = userDao.save(user);
         UserDTO userDTOForAudit = this.convertorUserToDTO.convert(updateUserFromDB);
-        saveActionToAudit(userDTOForAudit, "Пользователь активирован");
+        saveActionToAudit("Пользователь активирован",updateUserFromDB.getUuid().toString(), EEssenceType.USER);
         return updateUserFromDB;
     }
 
 
 
-    private void saveActionToAudit(UserDTO userDTO, String text){
+    private void saveActionToAudit(String text, String id, EEssenceType essenceType){
+        String userEmail = userHolder.getUser().getUsername();
+        User user = getCardByMail(userEmail);
         AuditCreatDTO auditCreatDTO = new AuditCreatDTO(
-            userDTO.getUuid(),
-            userDTO.getMail(),
-            userDTO.getFio(),
-            EUserRole.valueOf(userDTO.getRole()),
+            user.getUuid(),
+            user.getMail(),
+            user.getFio(),
+            user.getRole(),
             text,
-            EEssenceType.USER,
-            userDTO.getUuid().toString()
+            essenceType,
+            id
         );
         this.auditService.save(auditCreatDTO);
     }
