@@ -31,7 +31,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addFormatter(new LocalDateTimeFormatter(conversionService));
         registry.addConverter(new ProjectCreateDTOToProjectConverter());
         registry.addConverter(new UserToUserDTOConvertor());
+        registry.addConverter(new UserDTOToUserConvertor());
         registry.addConverter(new ProjectToProjectDTOConverter());
-
+        registry.addConverter(new UserToUserDetailsConverter());
     }
 }

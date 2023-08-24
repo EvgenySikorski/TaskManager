@@ -1,9 +1,12 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.controller;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.LoginDTO;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserRegistrationDTO;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.UserHolder;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuthenticationService;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +21,11 @@ import java.util.UUID;
 public class AuthenticationController {
 
     private final IAuthenticationService authenticationService;
-    private final UserHolder userHolder;
+    private final ConversionService conversionService;
 
-    public AuthenticationController(IAuthenticationService authenticationService,  UserHolder userHolder) {
+    public AuthenticationController(IAuthenticationService authenticationService, ConversionService conversionService) {
         this.authenticationService = authenticationService;
-        this.userHolder = userHolder;
+        this.conversionService = conversionService;
     }
 
     @PostMapping(value ="/registration", consumes = "application/json", produces = "application/json")
@@ -47,8 +50,10 @@ public class AuthenticationController {
     }
 
     @GetMapping(value ="/me", consumes = "application/json", produces = "application/json")
-    public UserDetails details (){
-        return userHolder.getUser();
+    public ResponseEntity<?> getMe (){
+        User me = this.authenticationService.getMe();
+        UserDTO userDTO = this.conversionService.convert(me, UserDTO.class);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
 

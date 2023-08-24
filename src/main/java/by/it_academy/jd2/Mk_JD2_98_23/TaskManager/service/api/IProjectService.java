@@ -13,7 +13,7 @@ public interface IProjectService {
 
     Project save(ProjectCreatDTO item);
 
-    Page<Project> get(PageRequest pageRequest);
+    Page<Project> get(PageRequest pageRequest, boolean archived);
 
     Project get(UUID uuid);
 

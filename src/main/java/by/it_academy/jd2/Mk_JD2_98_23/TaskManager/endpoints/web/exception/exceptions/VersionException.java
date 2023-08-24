@@ -4,4 +4,8 @@ public class VersionException extends RuntimeException {
     public VersionException(){
 
     }
+
+    public VersionException(String message){
+        super(message);
+    }
 }

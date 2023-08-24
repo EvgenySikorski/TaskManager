@@ -1,17 +1,15 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserDTOToUserConvertor;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.LoginDTO;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserCreateDTO;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDTO;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserRegistrationDTO;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.*;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EErrorType;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserStatus;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.errors.ErrorResponse;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.IUserDao;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.controller.utils.JwtTokenHandler;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.MailAlreadyExistsException;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.PasswordWrongException;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.*;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuthenticationService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.INotificationService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
@@ -19,7 +17,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 @Service
 public class AuthenticationService implements IAuthenticationService {
@@ -28,18 +30,17 @@ public class AuthenticationService implements IAuthenticationService {
     private final UserDTOToUserConvertor converterDTOToUser;
     private final PasswordEncoder encoder;
     private final JwtTokenHandler jwtHandler;
-    private final UserDetailsService detailsService;
+    private final UserHolder userHolder;
     private final INotificationService notificationService;
 
-
     public AuthenticationService(IUserService userService, UserDTOToUserConvertor converterDTOToUser,
-                                 PasswordEncoder encoder, JwtTokenHandler jwtHandler,
-                                 UserDetailsService detailsService, INotificationService notificationService) {
+                                 PasswordEncoder encoder, JwtTokenHandler jwtHandler, UserHolder userHolder,
+                                 INotificationService notificationService) {
         this.userService = userService;
         this.converterDTOToUser = converterDTOToUser;
         this.encoder = encoder;
         this.jwtHandler = jwtHandler;
-        this.detailsService = detailsService;
+        this.userHolder = userHolder;
         this.notificationService = notificationService;
     }
 
@@ -54,7 +55,7 @@ public class AuthenticationService implements IAuthenticationService {
                 item.getFio(),
                 EUserRole.USER.name(),
                 EUserStatus.WAITING_ACTIVATION.name(),
-                encoder.encode(item.getPassword())
+                item.getPassword()
         );
 
         notificationService.send(userService.save(userCreateDTO));
@@ -74,19 +75,41 @@ public class AuthenticationService implements IAuthenticationService {
         return true;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String login(LoginDTO dto) {
-        UserDetails userDetails = detailsService.loadUserByUsername(dto.getMail());
-        if (encoder.matches(dto.getPassword(),userDetails.getPassword())){
-            throw new PasswordWrongException();
+
+        User user = this.userService.getCardByMail(dto.getMail());
+        if (user == null){
+            throw new UserNotFoundException();
         }
-        if (!dto.getPassword().equals(userDetails.getPassword())){
+
+        EUserStatus status = user.getStatus();
+
+        if (EUserStatus.DEACTIVATED.equals(status)){
+            throw new DeactivatedUserException();
+        } else if (EUserStatus.WAITING_ACTIVATION.equals(status)){
+            throw new NoActivatedUserException();
+        }
+
+        if (user.getRole().equals(EUserRole.ADMIN)){
+            if (!dto.getPassword().equals(user.getPassword())){
+                throw new PasswordWrongException();
+            }
+            return jwtHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
+        }
+
+        if (!this.encoder.matches(dto.getPassword(), user.getPassword())) {
             throw new PasswordWrongException();
         }
 
-        if(!userDetails.isAccountNonLocked()){
-            throw new RuntimeException("акаунт не активен");
-        }
-        return jwtHandler.generateAccessToken(userDetails);
+        return jwtHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public User getMe() {
+        UserDetailsImpl user = this.userHolder.getUser();
+        return this.userService.get(user.getUuid());
     }
 }

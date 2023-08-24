@@ -2,19 +2,13 @@ package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.excep
 
 import java.util.UUID;
 
-public class UserNotFoundException extends RuntimeException {
+public class ProjectNotFoundException extends RuntimeException {
 
     private UUID uuid;
 
-    public UserNotFoundException(UUID uuid) {
+    public ProjectNotFoundException(UUID uuid) {
         super();
         this.uuid = uuid;
-    }
-
-    public UserNotFoundException() {
-    }
-
-    public UserNotFoundException(String message) {
     }
 
     public UUID getUuid() {
@@ -25,4 +19,3 @@ public class UserNotFoundException extends RuntimeException {
         this.uuid = uuid;
     }
 }
-

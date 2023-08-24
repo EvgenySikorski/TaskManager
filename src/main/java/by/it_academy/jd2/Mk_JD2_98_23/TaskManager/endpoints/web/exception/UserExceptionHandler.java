@@ -54,13 +54,19 @@ public class UserExceptionHandler {
     }
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFountError(UserNotFoundException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь с id " + exception.getUuid() + "не найден");
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь не найден");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AuditNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAuditNotFoundException(AuditNotFoundException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Аудит с id " + exception.getUuid() + "не найден");
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Аудит с uuid " + exception.getUuid() + "не найден");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProjectNotFoundException(ProjectNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Проект с uuid " + exception.getUuid() + "не найден");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -75,6 +81,18 @@ public class UserExceptionHandler {
         ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пароль указан не верно");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(DeactivatedUserException.class)
+    public ResponseEntity<ErrorResponse> handleDeactivatedError(DeactivatedUserException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь заблокирован или удален");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoActivatedUserException.class)
+    public ResponseEntity<ErrorResponse> handleNoActivatedUserError(NoActivatedUserException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь неактивирован");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 
 
 }

@@ -20,4 +20,6 @@ public interface IUserService {
     User getCardByMail(String email);
 
     User updateStatus(User user);
+
+
 }
