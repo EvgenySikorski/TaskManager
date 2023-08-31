@@ -6,6 +6,7 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.errors.StructuredErrorRes
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.*;
 import jakarta.validation.ConstraintViolationException;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class UserExceptionHandler {
@@ -52,6 +54,13 @@ public class UserExceptionHandler {
         response.getErrors().put("email", "Пользователь с такой почтой уже существует: " + exception.getEmail());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<StructuredErrorResponse> handleTaskTitleError(DataIntegrityViolationException exception){
+        StructuredErrorResponse response = new StructuredErrorResponse(EErrorType.STRUCTURED_ERROR, new HashMap<>());
+        response.getErrors().put("title", exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFountError(UserNotFoundException exception){
         ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь не найден");
@@ -59,14 +68,19 @@ public class UserExceptionHandler {
     }
 
     @ExceptionHandler(AuditNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleAuditNotFoundException(AuditNotFoundException exception){
+    public ResponseEntity<ErrorResponse> handleAuditNotFoundError(AuditNotFoundException exception){
         ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Аудит с uuid " + exception.getUuid() + "не найден");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ProjectNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleProjectNotFoundException(ProjectNotFoundException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Проект с uuid " + exception.getUuid() + "не найден");
+    public ResponseEntity<ErrorResponse> handleProjectNotFoundError(ProjectNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTaskNotFoundError(TaskNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Задача с uuid " + exception.getUuid() + "не найден");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -91,6 +105,25 @@ public class UserExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNoActivatedUserError(NoActivatedUserException exception){
         ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь неактивирован");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotValidTaskCreatDtoBodyException.class)
+    public ResponseEntity<?> handlerNotValidTaskCreatDtoBodyError(NotValidTaskCreatDtoBodyException ex) {
+        Map<String, String> errors = ex.getErrors();
+        StructuredErrorResponse response = new StructuredErrorResponse(EErrorType.STRUCTURED_ERROR, errors);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IncorrectDataExeption.class)
+    public ResponseEntity<ErrorResponse> handleIncorrectDataError(IncorrectDataExeption exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Введены некорректные данные");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserAccessForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleUserAccessForbiddenError(UserAccessForbiddenException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Нет необходимых прав для выполняемого действия");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
 

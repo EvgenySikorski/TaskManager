@@ -9,7 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
 
-public class UserToUserDetailsConverter implements Converter<User, UserDetailsImpl> {
+public class UserToUserDetailsConvertor implements Converter<User, UserDetailsImpl> {
     @Override
     public UserDetailsImpl convert(User source) {
         UserDetailsImpl userDetails = new UserDetailsImpl();

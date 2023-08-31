@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class LocalDateTimeToEpochConverter implements Converter <LocalDateTime, Long> {
+public class LocalDateTimeToEpochConvertor implements Converter <LocalDateTime, Long> {
 
     @Override
     public Long convert(LocalDateTime source) {

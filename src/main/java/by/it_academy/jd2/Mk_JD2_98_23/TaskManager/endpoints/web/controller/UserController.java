@@ -43,7 +43,7 @@ public class UserController {
                 users.getNumberOfElements(), users.isLast(),
                 users.get().map(this.convertor::convert).toList());
 
-        return new ResponseEntity<>(pageOfUserDTO, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(pageOfUserDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "{uuid}", consumes = "application/json", produces = "application/json" )
@@ -51,7 +51,7 @@ public class UserController {
         User user = userService.get(uuid);
         UserDTO userDTO = this.convertor.convert(user);
 
-        return new ResponseEntity<>(userDTO, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
     @PutMapping(value = "/{uuid}/dt_update/{dt_update}", consumes = "application/json", produces = "application/json")
@@ -64,6 +64,6 @@ public class UserController {
         User userUpdate = userService.update(userUpdateDTO);
         UserDTO userDTO = this.convertor.convert(userUpdate);
 
-        return new ResponseEntity<>(userDTO, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 }

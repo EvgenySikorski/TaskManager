@@ -4,18 +4,11 @@ import java.util.UUID;
 
 public class ProjectNotFoundException extends RuntimeException {
 
-    private UUID uuid;
-
-    public ProjectNotFoundException(UUID uuid) {
-        super();
-        this.uuid = uuid;
+    public ProjectNotFoundException(String message) {
+        super(message);
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    public ProjectNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

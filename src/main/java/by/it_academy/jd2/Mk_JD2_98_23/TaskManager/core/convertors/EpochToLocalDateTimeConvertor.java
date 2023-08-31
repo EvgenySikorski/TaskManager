@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
-public class EpochToLocalDateTimeConverter implements Converter<Long, LocalDateTime> {
+public class EpochToLocalDateTimeConvertor implements Converter<Long, LocalDateTime> {
     @Override
     public LocalDateTime convert(Long source) {
         return Instant.ofEpochMilli(source)

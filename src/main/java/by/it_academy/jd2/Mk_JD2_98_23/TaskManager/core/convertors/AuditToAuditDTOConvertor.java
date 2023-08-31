@@ -9,7 +9,7 @@ public class AuditToAuditDTOConvertor {
     public AuditDTO convert(Audit source){
         return new AuditDTO(
             source.getUuid(),
-            source.getDt_create(),
+            source.getDtCreate(),
             new AuditUserDTO(source.getUserUuid(),source.getMail(), source.getFio(), source.getRole()),
             source.getText(),
             source.getType(),

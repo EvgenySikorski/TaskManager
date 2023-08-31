@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface IAuditDao extends JpaRepository<Audit, UUID> {
 
-    @Override
     Page<Audit> findAll(Pageable pageable);
 
     @Override

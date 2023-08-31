@@ -18,7 +18,7 @@ public class Audit implements Serializable {
 
     @CreationTimestamp(source = SourceType.DB)
     @Column(name = "dt_create")
-    private LocalDateTime dt_create;
+    private LocalDateTime dtCreate;
 
     @Column(name = "user_uuid", nullable = false)
     private UUID userUuid;
@@ -56,10 +56,10 @@ public class Audit implements Serializable {
         this.id = id;
     }
 
-    public Audit(UUID uuid, LocalDateTime dt_create, UUID userUuid, String mail, String fio, EUserRole role,
+    public Audit(UUID uuid, LocalDateTime dtCreate, UUID userUuid, String mail, String fio, EUserRole role,
                  String text, EEssenceType type, String id) {
         this.uuid = uuid;
-        this.dt_create = dt_create;
+        this.dtCreate = dtCreate;
         this.userUuid = userUuid;
         this.mail = mail;
         this.fio = fio;
@@ -77,12 +77,12 @@ public class Audit implements Serializable {
         this.uuid = uuid;
     }
 
-    public LocalDateTime getDt_create() {
-        return dt_create;
+    public LocalDateTime getDtCreate() {
+        return dtCreate;
     }
 
-    public void setDt_create(LocalDateTime dt_create) {
-        this.dt_create = dt_create;
+    public void setDtCreate(LocalDateTime dtCreate) {
+        this.dtCreate = dtCreate;
     }
 
     public UUID getUserUuid() {
@@ -146,12 +146,12 @@ public class Audit implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Audit audit = (Audit) o;
-        return Objects.equals(uuid, audit.uuid) && Objects.equals(dt_create, audit.dt_create) && Objects.equals(userUuid, audit.userUuid) && Objects.equals(mail, audit.mail) && Objects.equals(fio, audit.fio) && role == audit.role && Objects.equals(text, audit.text) && type == audit.type && Objects.equals(id, audit.id);
+        return Objects.equals(uuid, audit.uuid) && Objects.equals(dtCreate, audit.dtCreate) && Objects.equals(userUuid, audit.userUuid) && Objects.equals(mail, audit.mail) && Objects.equals(fio, audit.fio) && role == audit.role && Objects.equals(text, audit.text) && type == audit.type && Objects.equals(id, audit.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, dt_create, userUuid, mail, fio, role, text, type, id);
+        return Objects.hash(uuid, dtCreate, userUuid, mail, fio, role, text, type, id);
     }
 }
 

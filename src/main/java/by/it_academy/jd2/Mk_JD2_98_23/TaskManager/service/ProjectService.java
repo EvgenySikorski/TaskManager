@@ -1,20 +1,15 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service;
 
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserToUserDTOConvertor;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDetailsImpl;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.audit.AuditCreatDTO;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.ProjectCreatDTO;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.ProjectDTO;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.ProjectCreateDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.ProjectUpdateDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.UserRefDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EEssenceType;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EProjectStatus;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.IAuditDao;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.IProjectDao;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.Project;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.ConversionException;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.IncorrectDataExeption;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.exception.exceptions.ProjectNotFoundException;
@@ -23,17 +18,14 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuditService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IProjectService;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
 @Service
 public class ProjectService implements IProjectService {
 
@@ -58,7 +50,7 @@ public class ProjectService implements IProjectService {
 
     @Transactional
     @Override
-    public Project save(ProjectCreatDTO item) {
+    public Project save(ProjectCreateDTO item) {
 
         Project project = conversionService.convert(item, Project.class);
         Project saveProject;
@@ -75,28 +67,52 @@ public class ProjectService implements IProjectService {
     @Transactional(readOnly = true)
     @Override
     public Page<Project> get(PageRequest pageRequest, boolean archived) {
-        if (pageRequest.getPageNumber() < 0 || pageRequest.getPageSize() < 0){
+        if (pageRequest.getPageNumber() < 0 || pageRequest.getPageSize() < 1){
             throw new IncorrectDataExeption(INCORRECT_DATA);
         }
+        UserDetailsImpl userDetails = this.userHolder.getUser();
 
-        if (!archived){
-            return this.projectDao.findAllByStatus(pageRequest, EProjectStatus.ACTIVE);
+
+        if(userDetails.getRole().equals(EUserRole.ADMIN)) {
+            try{
+                if (!archived) {
+                    return this.projectDao.findAllByStatus(pageRequest, EProjectStatus.ACTIVE);
+                }
+                return this.projectDao.findAll(pageRequest);
+            } catch (DataAccessException ex) {
+                throw new ProjectNotFoundException("Проект не найден", ex);
+            }
+        } else if(userDetails.getRole().equals(EUserRole.USER)) {
+            try {
+                if (!archived) {
+                    return this.projectDao.findByStatusAndManagerOrStatusAndStaff(
+                            EProjectStatus.ACTIVE, userDetails.getUuid(),
+                            EProjectStatus.ACTIVE, userDetails.getUuid(),
+                            pageRequest);
+                }
+                return this.projectDao.findByManagerOrStaff(
+                        userDetails.getUuid(),
+                        userDetails.getUuid(),
+                        pageRequest);
+            } catch (DataAccessException ex) {
+                throw new ProjectNotFoundException("Проект не найден", ex);
+            }
         }
-        return this.projectDao.findAll(pageRequest);
+        return null;
     }
 
     @Transactional(readOnly = true)
     @Override
     public Project get(UUID uuid) {
         return this.projectDao.findById(uuid)
-                .orElseThrow(() -> new ProjectNotFoundException(uuid));
+                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден"));
     }
 
     @Transactional
     @Override
     public Project update(ProjectUpdateDTO item) {
         Project projectFromDB = this.get(item.getUuid());
-        if (!item.getDtUpdate().isEqual(projectFromDB.getDtUpdate())){
+        if (!item.getDateUpdate().isEqual(projectFromDB.getDtUpdate())){
             throw new VersionException("Версии не совпадают");
         }
 
@@ -114,7 +130,7 @@ public class ProjectService implements IProjectService {
         Project updateProject = this.projectDao.saveAndFlush(projectFromDB);
         saveActionToAudit("Обновлен проект", updateProject.getUuid(), EEssenceType.PROJECT);
 
-        return null;
+        return updateProject;
     }
 
     private void saveActionToAudit(String text, UUID uuid, EEssenceType essenceType){
@@ -130,4 +146,24 @@ public class ProjectService implements IProjectService {
         );
         this.auditService.save(auditCreatDTO);
     }
+
+    @Override
+    public List<Project> getByUser(UUID userUuid) {
+        List<Project> projectList = this.projectDao.findByManagerOrStaff(userUuid, userUuid);
+        if (projectList.isEmpty()){
+            throw new ProjectNotFoundException("Проект по указанному UUID не найден");
+        }
+        return projectList;
+    }
+
+    @Override
+    public List<Project> get(List<UUID> projectUuids, UUID user) {
+        return this.projectDao.findByUuidInAndManagerOrUuidInAndStaff(
+                projectUuids, user,
+                projectUuids, user);
+    }
+
+    @Override
+    public List<Project> findAllByIdIn(Collection<UUID> uuid) {
+        return this.projectDao.findAllById(uuid);    }
 }

@@ -26,13 +26,15 @@ public class WebConfig implements WebMvcConfigurer {
 
         ConversionService conversionService = (ConversionService) registry;
 
-        registry.addConverter(new EpochToLocalDateTimeConverter());
-        registry.addConverter(new LocalDateTimeToEpochConverter());
+        registry.addConverter(new EpochToLocalDateTimeConvertor());
+        registry.addConverter(new LocalDateTimeToEpochConvertor());
         registry.addFormatter(new LocalDateTimeFormatter(conversionService));
-        registry.addConverter(new ProjectCreateDTOToProjectConverter());
+        registry.addConverter(new ProjectCreateDTOToProjectConvertor());
         registry.addConverter(new UserToUserDTOConvertor());
         registry.addConverter(new UserDTOToUserConvertor());
-        registry.addConverter(new ProjectToProjectDTOConverter());
-        registry.addConverter(new UserToUserDetailsConverter());
+        registry.addConverter(new ProjectToProjectDTOConvertor());
+        registry.addConverter(new UserToUserDetailsConvertor());
+        registry.addConverter(new TaskToTaskDtoConvertor());
+
     }
 }

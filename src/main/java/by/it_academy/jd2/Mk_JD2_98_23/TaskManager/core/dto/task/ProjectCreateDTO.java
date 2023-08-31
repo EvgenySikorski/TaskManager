@@ -1,12 +1,10 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EProjectStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
-import java.util.UUID;
 
-public class ProjectCreatDTO {
+public class ProjectCreateDTO {
 
     private String name;
     private String description;
@@ -14,11 +12,11 @@ public class ProjectCreatDTO {
     private Set<UserRefDTO> staff;
     private EProjectStatus status;
 
-    public ProjectCreatDTO() {
+    public ProjectCreateDTO() {
     }
 
-    public ProjectCreatDTO(String name, String description, UserRefDTO manager,
-                           Set<UserRefDTO> staff, EProjectStatus status) {
+    public ProjectCreateDTO(String name, String description, UserRefDTO manager,
+                            Set<UserRefDTO> staff, EProjectStatus status) {
         this.name = name;
         this.description = description;
         this.manager = manager;

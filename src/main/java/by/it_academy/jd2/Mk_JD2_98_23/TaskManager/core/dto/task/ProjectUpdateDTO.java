@@ -16,21 +16,21 @@ public class ProjectUpdateDTO {
     private Set<UserRefDTO> staff;
     private EProjectStatus status;
     @JsonProperty ("dt_update")
-    private LocalDateTime dtUpdate;
+    private LocalDateTime dateUpdate;
 
     public ProjectUpdateDTO() {
     }
 
     public ProjectUpdateDTO(UUID uuid, String name, String description,
                             UserRefDTO manager, Set<UserRefDTO> staff,
-                            EProjectStatus status, LocalDateTime dtUpdate) {
+                            EProjectStatus status, LocalDateTime dateUpdate) {
         this.uuid = uuid;
         this.name = name;
         this.description = description;
         this.manager = manager;
         this.staff = staff;
         this.status = status;
-        this.dtUpdate = dtUpdate;
+        this.dateUpdate = dateUpdate;
     }
 
     public UUID getUuid() {
@@ -81,11 +81,11 @@ public class ProjectUpdateDTO {
         this.status = status;
     }
 
-    public LocalDateTime getDtUpdate() {
-        return dtUpdate;
+    public LocalDateTime getDateUpdate() {
+        return dateUpdate;
     }
 
-    public void setDtUpdate(LocalDateTime dtUpdate) {
-        this.dtUpdate = dtUpdate;
+    public void setDateUpdate(LocalDateTime dateUpdate) {
+        this.dateUpdate = dateUpdate;
     }
 }
