@@ -6,6 +6,8 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface IUserService {
@@ -20,6 +22,9 @@ public interface IUserService {
     User getCardByMail(String email);
 
     User updateStatus(User user);
+
+    List<User> findAllById(Set<UUID> uuids);
+
 
 
 }

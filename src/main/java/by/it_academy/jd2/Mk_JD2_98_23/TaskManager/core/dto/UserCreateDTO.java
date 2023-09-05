@@ -4,7 +4,7 @@ public class UserCreateDTO {
 
     private String mail;
     private String fio;
-    private String role; //должен быть String или Enum
+    private String role;
     private String status;
 
     private String password;

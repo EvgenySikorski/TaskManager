@@ -4,14 +4,10 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.LoginDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserRegistrationDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
-import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.UserHolder;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IAuthenticationService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;

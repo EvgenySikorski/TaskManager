@@ -1,14 +1,15 @@
 package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.audit;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EEssenceType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class AuditDTO {
 
     private UUID uuid;
-    private LocalDateTime dt_create;
+    @JsonProperty("dt_create")
+    private Long dtCreate;
     private AuditUserDTO user;
     private String text;
     private EEssenceType type;
@@ -17,9 +18,9 @@ public class AuditDTO {
     public AuditDTO() {
     }
 
-    public AuditDTO(UUID uuid, LocalDateTime dt_create, AuditUserDTO user, String text, EEssenceType type, String id) {
+    public AuditDTO(UUID uuid, Long dtCreate, AuditUserDTO user, String text, EEssenceType type, String id) {
         this.uuid = uuid;
-        this.dt_create = dt_create;
+        this.dtCreate = dtCreate;
         this.user = user;
         this.text = text;
         this.type = type;
@@ -34,12 +35,12 @@ public class AuditDTO {
         this.uuid = uuid;
     }
 
-    public LocalDateTime getDt_create() {
-        return dt_create;
+    public Long getDtCreate() {
+        return dtCreate;
     }
 
-    public void setDt_create(LocalDateTime dt_create) {
-        this.dt_create = dt_create;
+    public void setDtCreate(Long dtCreate) {
+        this.dtCreate = dtCreate;
     }
 
     public AuditUserDTO getUser() {

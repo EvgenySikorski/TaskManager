@@ -35,6 +35,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addConverter(new ProjectToProjectDTOConvertor());
         registry.addConverter(new UserToUserDetailsConvertor());
         registry.addConverter(new TaskToTaskDtoConvertor());
+        registry.addConverter(new AuditCreatDTOToAuditConvertor());
+        registry.addConverter(new AuditToAuditDTOConvertor());
+
 
     }
 }

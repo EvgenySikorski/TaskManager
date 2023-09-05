@@ -57,6 +57,18 @@ public class UserDTO {
         this.dtUpdate = dtUpdate;
     }
 
+    public UserDTO(UUID uuid, String mail, String fio, String role, String status,
+                   Long dtUpdate, Long dtCreate) {
+        this.uuid = uuid;
+        this.mail = mail;
+        this.fio = fio;
+        this.role = role;
+        this.status = status;
+        this.dtUpdate = dtUpdate;
+        this.dtCreate = dtCreate;
+
+    }
+
     public UUID getUuid() {
         return uuid;
     }

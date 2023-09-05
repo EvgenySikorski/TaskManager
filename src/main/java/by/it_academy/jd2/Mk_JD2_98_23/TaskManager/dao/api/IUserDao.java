@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.ListCrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,8 +14,6 @@ public interface IUserDao extends JpaRepository<User, UUID> {
 
     User findByMail (String email);
 
-
-
-
-
+    @Override
+    List<User> findAllById(Iterable<UUID> uuids);
 }

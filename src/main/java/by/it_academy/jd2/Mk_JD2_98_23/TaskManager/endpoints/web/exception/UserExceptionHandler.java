@@ -36,7 +36,6 @@ public class UserExceptionHandler {
     }
     @ExceptionHandler({
             ConversionException.class,
-            IllegalArgumentException.class,
             IOException.class,
             IndexOutOfBoundsException.class,
             ArithmeticException.class,
@@ -46,6 +45,12 @@ public class UserExceptionHandler {
         ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Внутренняя ошибка сервера. " +
                 "Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentError(IllegalArgumentException exception){
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Запрос содержит некорректные данные: " + exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MailAlreadyExistsException.class)
@@ -58,12 +63,12 @@ public class UserExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<StructuredErrorResponse> handleTaskTitleError(DataIntegrityViolationException exception){
         StructuredErrorResponse response = new StructuredErrorResponse(EErrorType.STRUCTURED_ERROR, new HashMap<>());
-        response.getErrors().put("title", exception.getMessage());
+        response.getErrors().put("uniq name", exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFountError(UserNotFoundException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь не найден");
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -80,7 +85,7 @@ public class UserExceptionHandler {
     }
     @ExceptionHandler(TaskNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTaskNotFoundError(TaskNotFoundException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Задача с uuid " + exception.getUuid() + "не найден");
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Задача с uuid " + exception.getUuid() + " не найдена");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -103,12 +108,12 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(NoActivatedUserException.class)
     public ResponseEntity<ErrorResponse> handleNoActivatedUserError(NoActivatedUserException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь неактивирован");
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Пользователь не активирован");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NotValidTaskCreatDtoBodyException.class)
-    public ResponseEntity<?> handlerNotValidTaskCreatDtoBodyError(NotValidTaskCreatDtoBodyException ex) {
+    @ExceptionHandler(NotValidBodyException.class)
+    public ResponseEntity<?> handlerNotValidTaskCreatDtoBodyError(NotValidBodyException ex) {
         Map<String, String> errors = ex.getErrors();
         StructuredErrorResponse response = new StructuredErrorResponse(EErrorType.STRUCTURED_ERROR, errors);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -122,7 +127,7 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(UserAccessForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleUserAccessForbiddenError(UserAccessForbiddenException exception){
-        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Нет необходимых прав для выполняемого действия");
+        ErrorResponse response = new ErrorResponse(EErrorType.ERROR, "Данному токену авторизации запрещено выполнять запроса на данный адрес");
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 

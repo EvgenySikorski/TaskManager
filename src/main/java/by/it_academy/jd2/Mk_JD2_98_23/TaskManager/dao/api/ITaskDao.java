@@ -55,7 +55,7 @@ public interface ITaskDao extends JpaRepository<Task, UUID>, ListPagingAndSortin
             Pageable pageable
     );
 
-    Optional<Task> findByUuidAndProjectIn(
+    Optional<Task> findByUuidAndProjectUuidIn(
             UUID uuid, List<UUID> projects
     );
 

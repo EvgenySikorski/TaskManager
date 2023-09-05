@@ -4,25 +4,39 @@ import java.util.UUID;
 
 public class UserNotFoundException extends RuntimeException {
 
-    private UUID uuid;
-
-    public UserNotFoundException(UUID uuid) {
-        super();
-        this.uuid = uuid;
-    }
-
-    public UserNotFoundException() {
-    }
+    private String message;
 
     public UserNotFoundException(String message) {
+        this.message = message;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public UserNotFoundException(String message, String message1) {
+        super(message);
+        this.message = message1;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    public UserNotFoundException(String message, Throwable cause, String message1) {
+        super(message, cause);
+        this.message = message1;
+    }
+
+    public UserNotFoundException(Throwable cause, String message) {
+        super(cause);
+        this.message = message;
+    }
+
+    public UserNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String message1) {
+        super(message, cause, enableSuppression, writableStackTrace);
+        this.message = message1;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
 

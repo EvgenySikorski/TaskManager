@@ -30,15 +30,4 @@ public class LocalDateTimeFormatter implements Formatter<LocalDateTime> {
     public String print(LocalDateTime object, @NonNull Locale locale) {
         return String.valueOf(object.toEpochSecond(ZoneOffset.UTC));
     }
-
-//    @Override
-//    public LocalDateTime parse(String text, Locale locale) throws ParseException {
-//        long milliseconds = Long.parseLong(text);
-//        return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
-//    }
-//
-//    @Override
-//    public String print(LocalDateTime object, Locale locale) {
-//        return object.toString();
-//    }
 }

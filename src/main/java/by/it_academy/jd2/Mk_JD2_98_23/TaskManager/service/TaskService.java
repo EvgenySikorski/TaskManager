@@ -4,6 +4,7 @@ import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.UserDetailsImpl;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.audit.AuditCreatDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.*;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EEssenceType;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EProjectStatus;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.ETaskStatus;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.enums.EUserRole;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.api.ITaskDao;
@@ -30,6 +31,9 @@ public class TaskService implements ITaskService {
     private static final String PARAM_NAME_PROJECT = "project";
     private static final String PARAM_NAME_TITLE = "title";
     private static final String PARAM_NAME_IMPLEMENTER = "implementer";
+    private static final String FIELD_NAME_UUID = "uuid";
+    private static final String FIELD_NAME_STATUS = "status";
+
     private static final String INCORRECT_DATA = "Неверные данные. Попробуйте еще раз";
     private static final String TASK_EXIST_RESPONSE = "Задача с указанным названием уже сущестует";
     private static final String UNIQUE_CONSTRAINT_TITLE = "task_title_key";
@@ -71,6 +75,8 @@ public class TaskService implements ITaskService {
         Task saveTask;
         try {
             saveTask = this.taskDao.saveAndFlush(task);
+            saveActionToAudit("Создана новая задача",saveTask.getUuid(), EEssenceType.TASK);
+
         } catch (DataAccessException ex) {
             if (ex.getMessage().contains(UNIQUE_CONSTRAINT_TITLE)) {
                 throw new DataIntegrityViolationException(TASK_EXIST_RESPONSE, ex);
@@ -80,7 +86,6 @@ public class TaskService implements ITaskService {
         } catch (RuntimeException ex) {
             throw new RuntimeException (ex.getMessage(), ex);
         }
-        saveActionToAudit("Создана новая задача",saveTask.getUuid(), EEssenceType.TASK);
 
         return saveTask;
     }
@@ -114,7 +119,7 @@ public class TaskService implements ITaskService {
         } else{
             List<Project> projectList = this.projectService.getByUser(userDetails.getUuid());
             List<UUID> projectUuid = projectList.stream().map(Project::getUuid).toList();
-            return taskDao.findByUuidAndProjectIn(uuid, projectUuid).orElseThrow(()-> new UserAccessForbiddenException());
+            return taskDao.findByUuidAndProjectUuidIn(uuid, projectUuid).orElseThrow(()-> new UserAccessForbiddenException());
 
         }
     }
@@ -137,6 +142,8 @@ public class TaskService implements ITaskService {
         Task updateTask;
         try {
             updateTask = this.taskDao.saveAndFlush(taskFromDB);
+            saveActionToAudit("Задача обновлена",updateTask.getUuid(), EEssenceType.TASK);
+
         } catch (DataAccessException ex) {
             if (ex.getMessage().contains(UNIQUE_CONSTRAINT_TITLE)) {
                 throw new DataIntegrityViolationException(TASK_EXIST_RESPONSE, ex);
@@ -146,13 +153,15 @@ public class TaskService implements ITaskService {
         } catch (RuntimeException ex) {
             throw new RuntimeException (ex.getMessage(), ex);
         }
-        saveActionToAudit("Задача обновлена",updateTask.getUuid(), EEssenceType.TASK);
 
         return updateTask;
     }
 
     @Override
     public Task updateStatus(TaskStatusUpdateDTO item) {
+
+        validateStatusUpdateDto(item);
+
         Task taskFromDB = taskDao.findById(item.getUuid())
                 .orElseThrow(() -> new TaskNotFoundException(item.getUuid()));
 
@@ -163,6 +172,7 @@ public class TaskService implements ITaskService {
         Task updateTask;
         try {
             updateTask = this.taskDao.saveAndFlush(taskFromDB);
+            saveActionToAudit("Статус задачи обновлена",updateTask.getUuid(), EEssenceType.TASK);
         } catch (DataAccessException ex) {
             if (ex.getMessage().contains(UNIQUE_CONSTRAINT_TITLE)) {
                 throw new DataIntegrityViolationException(TASK_EXIST_RESPONSE, ex);
@@ -172,7 +182,6 @@ public class TaskService implements ITaskService {
         } catch (RuntimeException ex) {
             throw new RuntimeException (ex.getMessage(), ex);
         }
-        saveActionToAudit("Статус задачи обновлена",updateTask.getUuid(), EEssenceType.TASK);
 
         return updateTask;
     }
@@ -181,30 +190,29 @@ public class TaskService implements ITaskService {
         Map<String, String> errors = new HashMap<>();
 
         ProjectRefDTO projectRefDTO = dto.getProject();
+
+
         if (projectRefDTO == null){
-            errors.put(PARAM_NAME_PROJECT, "Project not specified");
+            errors.put(PARAM_NAME_PROJECT, "Не указан UUID проекта к которому ставиться задача");
         } else if (projectRefDTO.getUuid() == null){
-            errors.put(PARAM_NAME_PROJECT, "UUID of project contains uncorrect data");
+            errors.put(PARAM_NAME_PROJECT, "UUID проекта содержит некорректные данные");
+        } else{
+            checkAccessToCreatTask(projectRefDTO.getUuid());
         }
+
 
         String title = dto.getTitle();
         if (title == null){
-            errors.put(PARAM_NAME_TITLE, "Title not specified");
+            errors.put(PARAM_NAME_TITLE, "Название задачи не указано");
         } else if (title.equals("")){
-            errors.put(PARAM_NAME_TITLE, "Title cannot be empty");
+            errors.put(PARAM_NAME_TITLE, "Название задачи не указано");
         }
-
-        if (!errors.isEmpty()){
-            throw new NotValidTaskCreatDtoBodyException(errors);
-        }
-
-        checkAccessToCreatTask(projectRefDTO.getUuid());
 
         UserRefDTO implementer = dto.getImplementer();
         if (implementer == null){
-            errors.put(PARAM_NAME_IMPLEMENTER, "Implementer not specified");
+            errors.put(PARAM_NAME_IMPLEMENTER, "Исполнитель задачи не указан");
         } else if (implementer.getUuid() == null){
-            errors.put(PARAM_NAME_IMPLEMENTER, "UUID of implementer contains uncorrect data");
+            errors.put(PARAM_NAME_IMPLEMENTER, "UUID исполнителя задачи содержит некорректные данные");
         }
 
         try{
@@ -213,15 +221,38 @@ public class TaskService implements ITaskService {
                 Set<UUID> participant = project.getStaff();
                 participant.add(project.getManager());
                 if (!participant.contains(dto.getImplementer().getUuid())){
-                    errors.put(PARAM_NAME_IMPLEMENTER, "Such user does not participate in this project");
+                    errors.put(PARAM_NAME_IMPLEMENTER, "Указанный исполнитель задачи не участвует в проекте");
                 }
             }
         } catch(ProjectNotFoundException ex){
-            errors.put(PARAM_NAME_PROJECT, "Such project does not exists");
+            errors.put(PARAM_NAME_PROJECT, "Указанный проект не сущестует");
         }
 
         if (!errors.isEmpty()){
-            throw new NotValidTaskCreatDtoBodyException(errors);
+            throw new NotValidBodyException(errors);
+        }
+    }
+
+    private void validateStatusUpdateDto(TaskStatusUpdateDTO item){
+        Map<String, String> errors = new HashMap<>();
+
+        UUID uuid = item.getUuid();
+        if (uuid.toString() == null || "".equals(uuid.toString())){
+            errors.put(FIELD_NAME_UUID, "UUID задачи не указан");
+        }
+
+        ETaskStatus taskStatus = item.getStatus();
+        if (taskStatus == null || "".equals(taskStatus.name())){
+            errors.put(FIELD_NAME_STATUS, "Статус задачи не указан");
+        } else{
+            ETaskStatus[] arrTaskStatus = ETaskStatus.values();
+            if (!Arrays.asList(arrTaskStatus).contains(taskStatus)){
+                errors.put(FIELD_NAME_STATUS, "Статус задачи указан не верно");
+            }
+        }
+
+        if (!errors.isEmpty()){
+            throw new NotValidBodyException(errors);
         }
     }
 

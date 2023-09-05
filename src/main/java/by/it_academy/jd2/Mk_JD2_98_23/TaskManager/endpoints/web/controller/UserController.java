@@ -2,8 +2,10 @@ package by.it_academy.jd2.Mk_JD2_98_23.TaskManager.endpoints.web.controller;
 
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.convertors.UserToUserDTOConvertor;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.*;
+import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.core.dto.task.ProjectDTO;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.dao.entity.User;
 import by.it_academy.jd2.Mk_JD2_98_23.TaskManager.service.api.IUserService;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -18,17 +20,17 @@ import java.util.UUID;
 public class UserController {
 
     private final IUserService userService;
-    private final UserToUserDTOConvertor convertor;
+    private final ConversionService conversionService;
 
-    public UserController(IUserService userService, UserToUserDTOConvertor convertor) {
+    public UserController(IUserService userService, ConversionService conversionService) {
         this.userService = userService;
-        this.convertor = convertor;
+        this.conversionService = conversionService;
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<UserDTO> save(@RequestBody UserCreateDTO userCreateDTO){
         User createUser = this.userService.save(userCreateDTO);
-        UserDTO userDTO = this.convertor.convert(createUser);
+        UserDTO userDTO = this.conversionService.convert(createUser, UserDTO.class);
         return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
     }
 
@@ -41,7 +43,7 @@ public class UserController {
         PageDTO<UserDTO> pageOfUserDTO = new PageDTO<>(users.getNumber(),users.getSize(),
                 users.getTotalPages(), users.getTotalElements(), users.isFirst(),
                 users.getNumberOfElements(), users.isLast(),
-                users.get().map(this.convertor::convert).toList());
+                users.get().map(u -> conversionService.convert(u, UserDTO.class)).toList());
 
         return new ResponseEntity<>(pageOfUserDTO, HttpStatus.OK);
     }
@@ -49,7 +51,7 @@ public class UserController {
     @GetMapping(value = "{uuid}", consumes = "application/json", produces = "application/json" )
     public ResponseEntity<UserDTO> readCard(@PathVariable UUID uuid) {
         User user = userService.get(uuid);
-        UserDTO userDTO = this.convertor.convert(user);
+        UserDTO userDTO = this.conversionService.convert(user, UserDTO.class);
 
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
@@ -62,7 +64,7 @@ public class UserController {
         userUpdateDTO.setUuid(uuid);
 
         User userUpdate = userService.update(userUpdateDTO);
-        UserDTO userDTO = this.convertor.convert(userUpdate);
+        UserDTO userDTO = this.conversionService.convert(userUpdate, UserDTO.class);
 
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
