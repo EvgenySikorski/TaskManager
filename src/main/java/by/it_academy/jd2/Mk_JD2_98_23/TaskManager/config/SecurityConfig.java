@@ -51,7 +51,6 @@ public class SecurityConfig {
                 .requestMatchers("users/registration").permitAll()
                 .requestMatchers("users/verification").permitAll()
                 .requestMatchers("/users/me").authenticated()
-                .requestMatchers(HttpMethod.PATCH,"/task*").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
                 .requestMatchers("/users").hasAnyAuthority("ROLE_ADMIN")
                 .requestMatchers("/users/*/dt_update/*").hasAnyAuthority("ROLE_ADMIN")
                 .requestMatchers("/audit*").hasAnyAuthority("ROLE_ADMIN")

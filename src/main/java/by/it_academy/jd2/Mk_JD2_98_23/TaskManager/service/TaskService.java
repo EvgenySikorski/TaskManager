@@ -126,6 +126,7 @@ public class TaskService implements ITaskService {
 
     @Override
     public Task update(TaskCreateDTO item, UUID uuid, LocalDateTime dtUpdate) {
+
         validateDto(item);
 
         Task taskFromDB = get(uuid);
@@ -186,10 +187,10 @@ public class TaskService implements ITaskService {
         return updateTask;
     }
 
-    private void validateDto(TaskCreateDTO dto){
+    private void validateDto(TaskCreateDTO item){
         Map<String, String> errors = new HashMap<>();
 
-        ProjectRefDTO projectRefDTO = dto.getProject();
+        ProjectRefDTO projectRefDTO = item.getProject();
 
 
         if (projectRefDTO == null){
@@ -201,14 +202,24 @@ public class TaskService implements ITaskService {
         }
 
 
-        String title = dto.getTitle();
+        String title = item.getTitle();
         if (title == null){
             errors.put(PARAM_NAME_TITLE, "Название задачи не указано");
         } else if (title.equals("")){
             errors.put(PARAM_NAME_TITLE, "Название задачи не указано");
         }
 
-        UserRefDTO implementer = dto.getImplementer();
+        ETaskStatus taskStatus = item.getStatus();
+        if (taskStatus == null || "".equals(taskStatus.name())){
+            errors.put(FIELD_NAME_STATUS, "Статус не указан");
+        } else{
+            ETaskStatus[] arrTaskStatus = ETaskStatus.values();
+            if (!Arrays.asList(arrTaskStatus).contains(taskStatus)){
+                errors.put(FIELD_NAME_STATUS, "Статус проекта указан не верно");
+            }
+        }
+
+        UserRefDTO implementer = item.getImplementer();
         if (implementer == null){
             errors.put(PARAM_NAME_IMPLEMENTER, "Исполнитель задачи не указан");
         } else if (implementer.getUuid() == null){
@@ -216,11 +227,11 @@ public class TaskService implements ITaskService {
         }
 
         try{
-            if (dto.getImplementer() != null){
-                Project project = this.projectService.get(dto.getProject().getUuid());
+            if (item.getImplementer() != null){
+                Project project = this.projectService.get(item.getProject().getUuid());
                 Set<UUID> participant = project.getStaff();
                 participant.add(project.getManager());
-                if (!participant.contains(dto.getImplementer().getUuid())){
+                if (!participant.contains(item.getImplementer().getUuid())){
                     errors.put(PARAM_NAME_IMPLEMENTER, "Указанный исполнитель задачи не участвует в проекте");
                 }
             }
