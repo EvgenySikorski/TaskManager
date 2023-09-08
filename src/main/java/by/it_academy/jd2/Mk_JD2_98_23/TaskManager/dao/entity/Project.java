@@ -23,7 +23,7 @@ public class Project implements Serializable {
     @CreationTimestamp(source = SourceType.DB)
     @Column(name = "dt_create", precision = 3)
     private LocalDateTime dtCreat;
-    @UpdateTimestamp(source = SourceType.DB)
+    @UpdateTimestamp(source = SourceType.VM)
     @Version
     @Column(name = "dt_update", precision = 3)
     private LocalDateTime dtUpdate;

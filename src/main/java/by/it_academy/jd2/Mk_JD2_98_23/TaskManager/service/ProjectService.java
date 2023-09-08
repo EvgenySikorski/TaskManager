@@ -144,7 +144,7 @@ public class ProjectService implements IProjectService {
         Set<UUID> staff = project.getStaff();
         staff.add(project.getManager());
 
-        if (! staff.contains(user.getUuid())){
+        if (!staff.contains(user.getUuid())){
             throw new UserAccessForbiddenException();
         }
 
@@ -161,15 +161,15 @@ public class ProjectService implements IProjectService {
 
         UserDetailsImpl user = this.userHolder.getUser();
 
-        if (!(EUserRole.MANAGER.equals(user.getRole()) || EUserRole.ADMIN.equals(user.getRole()))){
-            throw new UserAccessForbiddenException();
-        }
-
-        if (EUserRole.MANAGER.equals(user.getRole())){
-            if (!user.getUuid().equals(projectFromDB.getManager())){
-                throw new UserAccessForbiddenException();
-            }
-        }
+//        if (!(EUserRole.MANAGER.equals(user.getRole()) || EUserRole.ADMIN.equals(user.getRole()))){
+//            throw new UserAccessForbiddenException();
+//        }
+//
+//        if (EUserRole.MANAGER.equals(user.getRole())){
+//            if (!user.getUuid().equals(projectFromDB.getManager())){
+//                throw new UserAccessForbiddenException();
+//            }
+//        }
 
         if (!item.getDateUpdate().isEqual(projectFromDB.getDtUpdate())){
             throw new VersionException("Версии не совпадают");

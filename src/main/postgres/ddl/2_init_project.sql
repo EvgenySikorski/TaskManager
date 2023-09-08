@@ -21,3 +21,4 @@ CREATE TABLE app.project_user
         ON DELETE NO ACTION
         NOT VALID
 );
+
